@@ -1,0 +1,28 @@
+name: Bash CI Demo
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  run-bash-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run CI Bash script
+      run: |
+        chmod +x ./ci.sh
+        ./ci.sh
+
+    - name: Send Google Chat Notification
+      run: |
+        curl -X POST "https://chat.googleapis.com/v1/spaces/AAAAOm2RDUk/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=lcXnN9Bcr-TgQosvRZ9ESMqFxOUDyMiCmOTVKOAIu0Y" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "text": "✅ GitHub CI completed for commit '"$GITHUB_SHA"' on repo '"$GITHUB_REPOSITORY"'"
+          }'
+      env:
+        GCHAT_WEBHOOK: ${{ secrets.GCHAT_WEBHOOK }}
